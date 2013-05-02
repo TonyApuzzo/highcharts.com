@@ -30,7 +30,7 @@ public class Server {
 
 	protected static Logger logger = Logger.getLogger("utils");
 
-	public Server(String exec, String script, String host, int port, int connectTimeout, int readTimeout, int maxTimeout) {
+	public Server(final String exec, final String script, final String host, final int port, final int connectTimeout, final int readTimeout, final int maxTimeout) {
 
 		// assign port and host to this instance
 		this.port = port;
@@ -52,8 +52,8 @@ public class Server {
 			final BufferedReader bufferedReader = new BufferedReader(
 					new InputStreamReader(process.getInputStream()));
 			String readLine = bufferedReader.readLine();
-			if (readLine == null || !readLine.contains("ready")) {
-				throw new RuntimeException("Error, PhantomJS couldnot start");
+			if ((readLine == null) || !readLine.contains("ready")) {
+				throw new RuntimeException("Error, PhantomJS couldnot start: " + readLine);
 			}
 
 			initialize();
@@ -83,7 +83,7 @@ public class Server {
 		logger.debug("Phantom server started on port " + port);
 	}
 
-	public String request(String params) throws SocketTimeoutException, SVGConverterException, TimeoutException {
+	public String request(final String params) throws SocketTimeoutException, SVGConverterException, TimeoutException {
 		String response = "";
 		Timer _timer = new Timer();
 		try {
@@ -153,7 +153,7 @@ public class Server {
 		return state;
 	}
 
-	public void setState(ServerState state) {
+	public void setState(final ServerState state) {
 		this.state = state;
 	}
 

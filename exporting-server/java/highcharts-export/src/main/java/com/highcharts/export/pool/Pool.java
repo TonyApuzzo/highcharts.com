@@ -15,12 +15,12 @@ public abstract class Pool<T> {
 
 	protected static Logger logger = Logger.getLogger("pool");
 
-	public Pool(ObjectFactory<T> factory, int number, int maxWait) throws PoolException {
+	public Pool(final ObjectFactory<T> factory, final int number, final int maxWait) throws PoolException {
 		this(factory,number);
 		this.maxWait = maxWait;
 	}
 
-    public Pool(ObjectFactory<T> factory, int number) throws PoolException {
+    public Pool(final ObjectFactory<T> factory, final int number) throws PoolException {
     	this.factory = factory;
     	ArrayList<T> list = new ArrayList<T>(number);
 		for (int i = 0; i < number; i++) {
@@ -28,7 +28,9 @@ public abstract class Pool<T> {
 				list.add(factory.makeObject());
 			} catch (Exception e) {
 				logger.error(e.getMessage());
-				throw new PoolException(e.getMessage());
+				final PoolException poolException = new PoolException(e.getMessage());
+				poolException.initCause(e);
+                throw poolException;
 			}
 		}
 		logger.debug("creating pool with size: " + list.size() );
@@ -46,7 +48,7 @@ public abstract class Pool<T> {
     	return object;
     }
 
-    public void giveBack(T object) throws InterruptedException {
+    public void giveBack(final T object) throws InterruptedException {
     	logger.debug("giving back: " + object.toString());
     	boolean isValid = factory.validateObject(object);
     	if (isValid) {
@@ -66,7 +68,7 @@ public abstract class Pool<T> {
     	logger.debug("after return, cache: " + cache.toString());
     }
 
-    public boolean add(T object) {
+    public boolean add(final T object) {
     	return this.cache.offer(object);
     }
 
@@ -75,7 +77,7 @@ public abstract class Pool<T> {
 		return maxWait;
 	}
 
-	public void setMaxWait(int maxWait) {
+	public void setMaxWait(final int maxWait) {
 		this.maxWait = maxWait;
 	}
 

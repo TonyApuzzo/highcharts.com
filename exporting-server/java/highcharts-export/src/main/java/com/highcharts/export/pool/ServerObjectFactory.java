@@ -1,5 +1,9 @@
 package com.highcharts.export.pool;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,14 +44,14 @@ public class ServerObjectFactory implements ObjectFactory<Server> {
 	}
 
 	@Override
-	public synchronized void removeObject(Server server) {
+	public synchronized void removeObject(final Server server) {
 		logger.debug("in destroyObject");
 		ServerObjectFactory.releasePort(server.getPort());
 		server.cleanup();
 	}
 
 	@Override
-	public boolean validateObject(Server server) {
+	public boolean validateObject(final Server server) {
 		boolean isValid = false;
 		try {
 			if(server.getState() != ServerState.IDLE) {
@@ -68,7 +72,7 @@ public class ServerObjectFactory implements ObjectFactory<Server> {
 		return isValid;
 	}
 
-	public static void releasePort(Integer port) {
+	public static void releasePort(final Integer port) {
 		logger.debug("Releasing port " + port);
 		portUsage.put(port, PortStatus.FREE);
 	}
@@ -92,7 +96,7 @@ public class ServerObjectFactory implements ObjectFactory<Server> {
 		return exec;
 	}
 
-	public void setExec(String exec) {
+	public void setExec(final String exec) {
 		this.exec = exec;
 	}
 
@@ -100,7 +104,7 @@ public class ServerObjectFactory implements ObjectFactory<Server> {
 		return script;
 	}
 
-	public void setScript(String script) {
+	public void setScript(final String script) {
 		this.script = script;
 	}
 
@@ -108,7 +112,7 @@ public class ServerObjectFactory implements ObjectFactory<Server> {
 		return host;
 	}
 
-	public void setHost(String host) {
+	public void setHost(final String host) {
 		this.host = host;
 	}
 
@@ -116,7 +120,7 @@ public class ServerObjectFactory implements ObjectFactory<Server> {
 		return basePort;
 	}
 
-	public void setBasePort(int basePort) {
+	public void setBasePort(final int basePort) {
 		this.basePort = basePort;
 	}
 
@@ -124,7 +128,7 @@ public class ServerObjectFactory implements ObjectFactory<Server> {
 		return readTimeout;
 	}
 
-	public void setReadTimeout(int readTimeout) {
+	public void setReadTimeout(final int readTimeout) {
 		this.readTimeout = readTimeout;
 	}
 
@@ -132,7 +136,7 @@ public class ServerObjectFactory implements ObjectFactory<Server> {
 		return connectTimeout;
 	}
 
-	public void setConnectTimeout(int connectTimeout) {
+	public void setConnectTimeout(final int connectTimeout) {
 		this.connectTimeout = connectTimeout;
 	}
 
@@ -140,19 +144,38 @@ public class ServerObjectFactory implements ObjectFactory<Server> {
 		return maxTimeout;
 	}
 
-	public void setMaxTimeout(int maxTimeout) {
+	public void setMaxTimeout(final int maxTimeout) {
 		this.maxTimeout = maxTimeout;
 	}
 
 	@PostConstruct
-	public void afterBeanInit() {
-		if(script == null || script.trim().isEmpty()) {
-			ClassLoader classLoader = getClass().getClassLoader();
-			URL url = classLoader.getResource("/../phantomjs/highcharts-convert.js");
-			this.setScript(url.getPath());
-		}
+	public void afterBeanInit() throws FileNotFoundException {
+        final String defaultScriptResource = "/../phantomjs/highcharts-convert.js";
+	    try {
+	        if((script == null) || script.trim().isEmpty()) {
+	            ClassLoader classLoader = getClass().getClassLoader();
+	            final URL url = classLoader.getResource(defaultScriptResource);
+	            if (null == url) {
+	                throw new FileNotFoundException("Unable to find default script resource: " + defaultScriptResource);
+	            }
+	            final URI uri = new URI(url.toString());
+	            final File file = new File(uri);
+	            if (!file.canRead()) {
+	                throw new FileNotFoundException("Unable to find default script: " + uri);
+	            }
+	            this.setScript(file.getAbsolutePath());
+	        } else {
+                final File file = new File(script);
+                if (!file.canRead()) {
+                    throw new FileNotFoundException("Unable to find script: " + script);
+                }
+	        }
+	    } catch (URISyntaxException e) {
+	        // This really should never happen, but just in case
+	        FileNotFoundException fileNotFoundException = new FileNotFoundException(e.getMessage() + ": " + defaultScriptResource);
+	        fileNotFoundException.initCause(e);
+	        throw fileNotFoundException;
+	    }
 	}
-
-
 
 }
