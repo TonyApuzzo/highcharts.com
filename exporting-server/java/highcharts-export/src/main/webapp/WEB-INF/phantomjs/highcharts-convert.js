@@ -34,7 +34,7 @@
 		var args = arguments, i, arg, length = args.length;
 		for (i = 0; i < length; i += 1) {
 			arg = args[i];
-			if (arg !== undefined && arg !== null && arg !== 'null' && arg != '0') {
+			if (arg !== undefined && arg !== null && arg !== 'null' && (arg != '0')) {
 				return arg;
 			}
 		}
@@ -138,7 +138,7 @@
 			scale has precedence : page.zoomFactor = params.scale  ? zoom * params.scale : zoom;*/
 
 			/* params.width has a higher precedence over scaling, to not break backover compatibility */
-			page.zoomFactor = params.scale && params.width == undefined ? zoom * params.scale : zoom;
+			page.zoomFactor = params.scale && (params.width == undefined) ? zoom * params.scale : zoom;
 
 			clipwidth = svg.width * page.zoomFactor;
 			clipheight = svg.height * page.zoomFactor;
@@ -334,6 +334,14 @@
 
 			// disable animations
 			Highcharts.SVGRenderer.prototype.Element.prototype.animate = Highcharts.SVGRenderer.prototype.Element.prototype.attr;
+
+            Highcharts.setOptions({
+                chart: {
+                    style: {
+                        fontFamily: '"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif, "Lucida Sans"'
+                    }
+                }
+            });
 
 			if (!options.chart) {
 				options.chart = {};
