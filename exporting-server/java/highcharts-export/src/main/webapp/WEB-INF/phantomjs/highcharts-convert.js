@@ -335,10 +335,11 @@
 			// disable animations
 			Highcharts.SVGRenderer.prototype.Element.prototype.animate = Highcharts.SVGRenderer.prototype.Element.prototype.attr;
 
+			// Add "SansSerif" to the font stack so that Batik can find a font on CentOS
             Highcharts.setOptions({
                 chart: {
                     style: {
-                        fontFamily: '"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif, "Lucida Sans"'
+                        fontFamily: '"Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif, "Lucida Sans", SansSerif'
                     }
                 }
             });
